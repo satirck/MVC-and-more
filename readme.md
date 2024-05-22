@@ -1,12 +1,12 @@
 Task:
 
-Работа с многомерными массивами:
+Функции для работы со строками в массивах:
 
-Создайте многомерный массив, содержащий данные вложенных массивов.
+Создайте массив, содержащий строки текста.
 
-Используйте foreach or nested loops to iterate through the multidimensional array.
+Используйте функции array_map(), trim(), strtoupper(), strtolower() or str_replace() to manipulate the strings within the array.
 
-Доступ к элементам многомерного массива.
+Выведите массив с измененными строками.
  
 
 Requirements:

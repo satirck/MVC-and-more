@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
-$numerics = [
-    'grades' => range(1, 20),
-    'scores' => range(20, 1),
+$strings = [
+    'school', 'family', 'daily', 'dairy', 'poem', 'poet'
 ];
 
-foreach ($numerics as $grades) {
-    print_r(array_map(fn($value): int => $value * $value, $grades));
-    echo '<br><br>';
-}
+$copy = $strings;
+
+print_r($strings);
+echo '<br><br>';
+
+print_r(array_map('strtoupper', $copy));
+echo '<br><br>';
