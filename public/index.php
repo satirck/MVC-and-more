@@ -40,8 +40,8 @@ function print_array(array $arr): void
 $data = generate_array();
 
 echo 'non filtered<br>';
-print_r($data);
-echo '<br>';
+print_array($data);
+echo '<br><br>';
 
 $filtered = filter_array_by_age($data);
 
