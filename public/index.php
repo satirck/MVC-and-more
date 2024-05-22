@@ -2,56 +2,57 @@
 
 declare(strict_types=1);
 
-function filter_by_product($sales, $product): array{
-    return array_filter($sales, static function($sale) use ($product) {
-        return $sale['product'] === $product;
-    });
+function array_copy(array $arr, int $start, int $stop): array
+{
+    return array_slice($arr, $start, $stop - $start);
 }
 
-function total_sales_by_product($sales): array {
-    $productSales = [];
-    foreach ($sales as $sale) {
-        if (!isset($productSales[$sale['product']])) {
-            $productSales[$sale['product']] = 0;
+function merge(array $left, array $right): array
+{
+    $sorted = array();
+    $i = $j = 0;
+    while ($i < count($left) && $j < count($right)) {
+        if ($left[$i] < $right[$j]) {
+            $sorted[] = $left[$i];
+            $i++;
+        } else {
+            $sorted[] = $right[$j];
+            $j++;
         }
-        $productSales[$sale['product']] += $sale['amount'];
     }
-    return $productSales;
+
+    while ($i < count($left)) {
+        $sorted[] = $left[$i];
+        $i++;
+    }
+
+    while ($j < count($right)) {
+        $sorted[] = $right[$j];
+        $j++;
+    }
+
+    return $sorted;
 }
 
-function getCountSalesByProduct($sales): array{
-    $products = array_column($sales, 'product');
-    return array_count_values($products);
+function merge_sort(array $arr): array
+{
+    $count = count($arr);
+
+    if ($count < 2) {
+        return $arr;
+    }
+
+    $mid = (int)($count / 2);
+
+    $left = merge_sort(array_copy($arr, 0, $mid));
+    $right = merge_sort(array_copy($arr, $mid, $count));
+
+    return merge($left, $right);
 }
 
-function getTotalSales($sales): int {
-    return array_sum(array_column($sales, 'amount'));
-}
+$nums = [5, 3, 2, 7, 8, 9, 20];
 
-$sales = [
-    ['date' => '2024-05-01', 'product' => 'A', 'amount' => 100],
-    ['date' => '2024-05-01', 'product' => 'B', 'amount' => 150],
-    ['date' => '2024-05-02', 'product' => 'A', 'amount' => 200],
-    ['date' => '2024-05-02', 'product' => 'C', 'amount' => 250],
-    ['date' => '2024-05-03', 'product' => 'A', 'amount' => 300],
-    ['date' => '2024-05-03', 'product' => 'B', 'amount' => 350],
-];
+$sorted_nums = merge_sort($nums);
 
-$productASales = filter_by_product($sales, 'A');
-
-$totalSalesByProduct = total_sales_by_product($sales);
-
-$countSalesByProduct = getCountSalesByProduct($sales);
-
-$totalSales = getTotalSales($sales);
-
-echo 'Filtered by product A:<br>';
-print_r($productASales);
-
-echo 'Total V for each product:<br>';
-print_r($totalSalesByProduct);
-
-echo 'Products sales:<br>';
-print_r($countSalesByProduct);
-
+print_r($sorted_nums);
 
