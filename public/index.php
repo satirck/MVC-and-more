@@ -2,22 +2,28 @@
 
 declare(strict_types=1);
 
-$arr1 = [
-    'parents' => array('mom', 'dad'),
-    'key' => array(array('value 1', 'value 2'), 1),
-    'value'
-];
+$arr1 = range(1, 10);
 
-$arr2 = [
-    range(1, 12),
-    'parents' => array('mom 1', 'dad 2'),
-];
 
-$res = array_merge_recursive($arr1, $arr2);
+$copy = $arr1;
 
-print_r($res);
+print_r($copy);
 echo '<br><br>';
 
-$res = array_merge($arr1, $arr2);
-print_r($res);
+unset($copy);
+
+//error, no such variable
+//print_r($copy);
+
+$arr2 = $arr1;
+
+array_splice($arr2, 4, 5);
+
+print_r($arr2);
+echo '<br><br>';
+
+//removes 1 elemnt from bottom, offset doesn`t make effects
+array_splice($arr2, -3, -1);
+
+print_r($arr2);
 echo '<br><br>';

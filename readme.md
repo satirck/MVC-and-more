@@ -1,16 +1,15 @@
 Task:
 
-Объединение массивов:
+Создайте массив, содержащий несколько элементов.
 
-Создайте два массива, содержащих разные данные.
+Используйте unset(), array_splice(), or array_shift() or array_pop() для удаления specific elements from the array.
 
-Используйте array_merge() или array_merge_recursive() для объединения двух массивов.
+Выведите массив после удаления элементов.
 
-Выведите объединенный массив.
 
 Requirements:
 
-    OS with docker installed on it
+* OS with docker installed on it
 
 
 Steps:
