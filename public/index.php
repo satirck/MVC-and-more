@@ -2,28 +2,35 @@
 
 declare(strict_types=1);
 
-$arr1 = range(1, 10);
+$arr1 = [
+    'must' => 'test',
+    'important' => 'family',
+    'php' => 'interesting',
+    'dump' => 'test'
+];
 
-
-$copy = $arr1;
-
-print_r($copy);
+print_r($arr1);
 echo '<br><br>';
 
-unset($copy);
+$keys = array_keys($arr1);
 
-//error, no such variable
-//print_r($copy);
-
-$arr2 = $arr1;
-
-array_splice($arr2, 4, 5);
-
-print_r($arr2);
+print_r($keys);
 echo '<br><br>';
 
-//removes 1 elemnt from bottom, offset doesn`t make effects
-array_splice($arr2, -3, -1);
+$keys = array_keys($arr1, 'test',true);
 
-print_r($arr2);
+print_r($keys);
+echo '<br><br>';
+
+$values = array_values($arr1);
+
+print_r($values);
+echo '<br><br>';
+
+foreach ($keys as $key){
+    $arr1[$key] = 'new value';
+}
+
+echo 'After changing<br>';
+print_r($arr1);
 echo '<br><br>';

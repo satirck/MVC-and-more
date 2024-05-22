@@ -1,11 +1,12 @@
 Task:
 
-Создайте массив, содержащий несколько элементов.
+Преобразование массива:
 
-Используйте unset(), array_splice(), or array_shift() or array_pop() для удаления specific elements from the array.
+Создайте массив, содержащий ассоциативные значения (ключ-значение).
 
-Выведите массив после удаления элементов.
+Используйте array_keys(), array_values(), or array_flip() to transform the array.
 
+Выведите новый массив, полученный в результате преобразования.    
 
 Requirements:
 
