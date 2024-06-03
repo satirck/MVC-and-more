@@ -3,17 +3,11 @@
 declare(strict_types=1);
 
 $message = '1Hello world1';
+$find = 'Hello';
 
-$res1 = trim($message, '1');
-echo $res1;
-
-$res2 = str_replace('world', 'Vlad', $res1);
+$res1 = strpos($message, $find, 0);
+echo $res1 === false ? 'not found' : ' found';
 echo '<br>';
-echo $res2;
 
-$pattern = '/\d/';
-$replace = '#replaced#';
-
-$res3 = preg_replace($pattern, $replace, $message);
-echo '<br>';
-echo $res3;
+$res2 = strpos($message, $find, 6);
+echo $res2 === false ? 'not found' : ' found';
