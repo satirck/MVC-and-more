@@ -2,14 +2,18 @@
 
 declare(strict_types=1);
 
-//block of trim
 $message = '1Hello world1';
 
-//exp 'Hello world'
 $res1 = trim($message, '1');
+echo $res1;
 
-
-//block of str_replace
-//exp 'Hello Vlad'
 $res2 = str_replace('world', 'Vlad', $res1);
+echo '<br>';
 echo $res2;
+
+$pattern = '/\d/';
+$replace = '#replaced#';
+
+$res3 = preg_replace($pattern, $replace, $message);
+echo '<br>';
+echo $res3;
