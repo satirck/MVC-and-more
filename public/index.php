@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
-$message = '1Hello world1';
-$find = 'Hello';
+function getEmails($string) {
+    $email_pattern = '/[^\s@]+@[^\s@]+\.[^\s@]+/';
+    preg_match_all($email_pattern, $string, $matches);
+    return $matches[0];
+}
 
-$res1 = strpos($message, $find, 0);
-echo $res1 === false ? 'not found' : ' found';
-echo '<br>';
+$string = "Привет, мой email адрес: example@example.com. Буду рад получить ваше письмо. Мой друг email@example.com также ждет ваших новостей. Напишите нам скорее!";
+$emails = getEmails($string);
 
-$res2 = strpos($message, $find, 6);
-echo $res2 === false ? 'not found' : ' found';
+echo "Найденные email адреса:\n";
+print_r($emails);
