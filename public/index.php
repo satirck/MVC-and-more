@@ -21,13 +21,11 @@ $res3 = strnatcmp($str2, $str3);
 
 echo sprintf('Case dependent: <br>Strings [%s] and [%s] are: %s<br>', $str2, $str3, $res3 == 0 ? 'equals' : 'not equals');
 
-function sortStrings(array &$strings, bool $ascending = true): void {
-    // Сравнительная функция для сортировки с учетом регистра
-    $cmpFunc = function ($a, $b) use ($ascending) {
-        return $ascending ? strnatcmp($a, $b) : strnatcmp($b, $a);
+function sortStrings(array &$strings, bool $isCI = true): void {
+    $cmpFunc = function ($a, $b) use ($isCI) {
+        return $isCI ? strnatcmp($a, $b) : strnatcmp($b, $a);
     };
 
-    // Сортировка массива
     usort($strings, $cmpFunc);
 }
 
@@ -36,13 +34,13 @@ $strings = ["apple", "Banana", "grape", "cherry", "Apple", "banana"];
 
 sortStrings($strings);
 
-echo 'Сортировка по возрастанию:<br>';
+echo 'Sort by asc:<br>';
 print_r($strings);
 echo '<br>';
 
 
 sortStrings($strings, false);
 
-echo 'Сортировка по убыванию:<br>';
+echo 'Sort by desc:<br>';
 print_r($strings);
 echo '<br>';
