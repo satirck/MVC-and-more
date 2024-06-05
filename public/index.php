@@ -2,41 +2,36 @@
 
 declare(strict_types=1);
 
-function removeHtmlTags(string $html): string {
-    return preg_replace('/<[.]*>/i', '', $html);
+function analyzeText($text) : void {
+    $wordCount = str_word_count($text);
+    $splitArr = explode(' ', $text);
+    $wordArr = str_word_count($text, 2);
+
+    echo sprintf('Text is <br>%s<br>', $text);
+    echo sprintf('Word count is %s<br>', $wordCount);
+    echo sprintf('Word count by space separator %s<br>', count($splitArr));
+    print_r($wordArr);
+    echo '<br><br>';
 }
 
-function extractUrls(string $html): array {
-    $pattern = '/https?:\/\/[^\s"<>\']+/i';
+function removeDuplicates(string $text): string {
+    $words = explode(' ', $text);
 
-    preg_match_all($pattern, $html, $matches);
+    $uniqueWords = array_unique($words);
 
-    return $matches[0];
+    return implode(' ', $uniqueWords);
 }
 
-$html_string = '
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    Hello world
-    <a href="http://localhost"></a>
-    <a href="https://vk.com"></a>
-</body>
-</html>';
+$text = 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi, placeat ullam aspernatur 
+architecto et, earum maxime vitae quam reiciendis sint ad velit delectus porro nulla aliquid non
+facilis perspiciatis autem. ';
 
-$escaped_html = htmlspecialchars($html_string, ENT_QUOTES, 'UTF-8');
-$clean_string = removeHtmlTags($html_string);
+$text2 = 'My cool Dad. My cool Mum.';
 
-echo sprintf('Original: %s<br><br>', $escaped_html);
-echo sprintf('Clean: %s<br><br>', $clean_string);
+analyzeText($text2);
 
-$urls = extractUrls($html_string);
+$res1 = removeDuplicates($text2);
+echo 'Unique: <br>';
 
-echo 'Extracted urls: <br>';
-print_r($urls);
-echo '<br>';
+analyzeText($res1);
+
