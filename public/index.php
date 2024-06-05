@@ -41,11 +41,6 @@ echo sprintf('Your ip [%s] is %scorrect<br>', $ip, isValidIPAddress($ip) ? '' : 
 
 $text = "Этот текс содержит ошибки, таке как опечатка в слове текс или неверное написание слова таке.";
 
-$corrections = array(
-    'текс' => 'текст',
-    'таке' => 'такие'
-);
-
 $newText = preg_replace('/текс/', 'текст', $text);
 $newText = preg_replace('/тaке/', 'такие', $newText);
 
