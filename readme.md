@@ -1,12 +1,12 @@
 Task:
 
-4. Работа с форматом дат:
+5. Шифрование и дешифрование строк:
 
-Напишите функцию, которая преобразует дату из одного формата в другой (например, из dd.mm.yyyy в yyyy-mm-dd).
+Напишите функцию, которая шифрует строку с помощью base64_encode() или других методов.
 
-Используйте функции date(), strtotime(), strftime() для выполнения задачи.
+Напишите функцию, которая дешифрует зашифрованную строку.
 
-Протестируйте функцию с разными датами и форматами.
+Продемонстрируйте работу функций на примерах с разными строками.
 
 Requirements:
 
@@ -15,9 +15,13 @@ Requirements:
 
 Steps:
 
-RUN
+RUN FOR FIRST TIME
 
-    /bin/bash ./run.sh
+    /bin/bash ./run.sh 
+
+RUN FOR REBUILD
+
+    /bin/bash ./runb.sh 
 
 
 If all works you`ll see at http://localhost your web page with some text on it

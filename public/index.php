@@ -2,28 +2,21 @@
 
 declare(strict_types=1);
 
-require_once('vendor/autoload.php');
+$message = 'This day is really cool cause of some events';
 
-use App\Logger\{Logger, FileNotFoundException};
-use App\Strings\{DateConvertor, InvalidInputException};
+$encodeBaseMessage = base64_encode($message);
+$decodeBaseMessage = base64_decode($encodeBaseMessage);
 
-$from_format = 'd.m.Y';
-$to_format = 'Y-m-d';
-$date = '02.04.2004';
+echo sprintf('Base64: <br> This message was first [%s]. Encode: [%s]; Decode: [%s]<br>',
+    $message, $encodeBaseMessage, $decodeBaseMessage);
 
-try {
-    $logger = new Logger('default');
-}catch (FileNotFoundException $e){
-    echo $e->getMessage();
-}
+$newMessage = 'Second one';
+$encodeBaseNewMessage = base64_encode($newMessage);
+$decodeBaseNewMessage = base64_decode($encodeBaseNewMessage);
 
-if (isset($logger)){
-    try {
-        $newDate = DateConvertor::convertDateFormat($date, $from_format, $to_format);
+echo sprintf('Base64 for another one: <br> This message was first [%s]. Encode: [%s]; Decode: [%s]<br>',
+    $newMessage, $encodeBaseNewMessage, $decodeBaseNewMessage);
 
-        $logger->info(sprintf('Get: [%s] from [%s]', $newDate, $date));
-    }catch (InvalidInputException $e){
-        $logger->error($e->getMessage());
-    }
+$isEquals = strcmp($encodeBaseMessage, $encodeBaseNewMessage);
 
-}
+echo sprintf('Are [%s] == [%s] ? %s', $encodeBaseMessage, $encodeBaseNewMessage, $isEquals === 0 ? 'true' : 'false<br>');
