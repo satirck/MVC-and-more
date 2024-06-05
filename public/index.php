@@ -2,45 +2,41 @@
 
 declare(strict_types=1);
 
-require_once 'autoloader.php';
-
-$str1 = 'Cool day';
-$str2 = 'Cool day';
-
-$str3 = 'cool day';
-
-$res1 = strcasecmp($str1, $str2);
-
-echo sprintf('Case independent: <br>Strings [%s] and [%s] are: %s<br>', $str1, $str2, $res1 == 0 ? 'equals' : 'not equals');
-
-$res2 = strcasecmp($str2, $str3);
-
-echo sprintf('Strings [%s] and [%s] are: %s<br>', $str2, $str3, $res2 == 0 ? 'equals' : 'not equals');
-
-$res3 = strnatcmp($str2, $str3);
-
-echo sprintf('Case dependent: <br>Strings [%s] and [%s] are: %s<br>', $str2, $str3, $res3 == 0 ? 'equals' : 'not equals');
-
-function sortStrings(array &$strings, bool $isCI = true): void {
-    $cmpFunc = function ($a, $b) use ($isCI) {
-        return $isCI ? strnatcmp($a, $b) : strnatcmp($b, $a);
-    };
-
-    usort($strings, $cmpFunc);
+function removeHtmlTags(string $html): string {
+    return preg_replace('/<[.]*>/i', '', $html);
 }
 
+function extractUrls(string $html): array {
+    $pattern = '/https?:\/\/[^\s"<>\']+/i';
 
-$strings = ["apple", "Banana", "grape", "cherry", "Apple", "banana"];
+    preg_match_all($pattern, $html, $matches);
 
-sortStrings($strings);
+    return $matches[0];
+}
 
-echo 'Sort by asc:<br>';
-print_r($strings);
-echo '<br>';
+$html_string = '
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    Hello world
+    <a href="http://localhost"></a>
+    <a href="https://vk.com"></a>
+</body>
+</html>';
 
+$escaped_html = htmlspecialchars($html_string, ENT_QUOTES, 'UTF-8');
+$clean_string = removeHtmlTags($html_string);
 
-sortStrings($strings, false);
+echo sprintf('Original: %s<br><br>', $escaped_html);
+echo sprintf('Clean: %s<br><br>', $clean_string);
 
-echo 'Sort by desc:<br>';
-print_r($strings);
+$urls = extractUrls($html_string);
+
+echo 'Extracted urls: <br>';
+print_r($urls);
 echo '<br>';
