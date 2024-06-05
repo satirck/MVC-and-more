@@ -2,36 +2,41 @@
 
 declare(strict_types=1);
 
-function analyzeText($text) : void {
-    $wordCount = str_word_count($text);
-    $splitArr = explode(' ', $text);
-    $wordArr = str_word_count($text, 2);
-
-    echo sprintf('Text is <br>%s<br>', $text);
-    echo sprintf('Word count is %s<br>', $wordCount);
-    echo sprintf('Word count by space separator %s<br>', count($splitArr));
-    print_r($wordArr);
-    echo '<br><br>';
+function areAnagrams(string $word1, string $word2): bool {
+    $array1 = str_split($word1);
+    $array2 = str_split($word2);
+    
+    sort($array1);
+    sort($array2);
+    
+    return $array1 === $array2;
 }
 
-function removeDuplicates(string $text): string {
-    $words = explode(' ', $text);
+function isPalindrome(string $text): bool {
+    $text = strtolower(str_replace(' ', '', $text));
+    
+    $array = str_split($text);
+    
+    $reversedArray = array_reverse($array);
 
-    $uniqueWords = array_unique($words);
-
-    return implode(' ', $uniqueWords);
+    return $array === $reversedArray;
 }
 
-$text = 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi, placeat ullam aspernatur 
-architecto et, earum maxime vitae quam reiciendis sint ad velit delectus porro nulla aliquid non
-facilis perspiciatis autem. ';
+$word1 = 'listen';
+$word2 = 'silent';
+$word3 = 'apple';
 
-$text2 = 'My cool Dad. My cool Mum.';
+$text1 = "Hello world";
+$text2 = "Madam";
 
-analyzeText($text2);
+echo 'Anagrams:<br>';
+echo sprintf('Words [%s] and [%s] are %s<br>', $word1, $word2,
+    areAnagrams($word1, $word2) ? 'anagrams' : 'not anagrams');
+echo sprintf('Words [%s] and [%s] are %s<br>', $word2, $word3,
+    areAnagrams($word2, $word3) ? 'anagrams' : 'not anagrams');
 
-$res1 = removeDuplicates($text2);
-echo 'Unique: <br>';
-
-analyzeText($res1);
-
+echo 'Palindromes:<br>';
+echo sprintf('Word [%s] is %s<br>', $text1,
+    isPalindrome($text1) ? 'Palindrome' : 'not a Palindrome');
+echo sprintf('Word [%s] is %s<br>', $text2,
+    isPalindrome($text2) ? 'Palindrome' : 'not a Palindrome');
