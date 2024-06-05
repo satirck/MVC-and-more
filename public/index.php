@@ -2,14 +2,28 @@
 
 declare(strict_types=1);
 
-function getEmails($string) {
-    $email_pattern = '/[^\s@]+@[^\s@]+\.[^\s@]+/';
-    preg_match_all($email_pattern, $string, $matches);
-    return $matches[0];
+require_once('vendor/autoload.php');
+
+use App\Logger\{Logger, FileNotFoundException};
+use App\Strings\{DateConvertor, InvalidInputException};
+
+$from_format = 'd.m.Y';
+$to_format = 'Y-m-d';
+$date = '02.04.2004';
+
+try {
+    $logger = new Logger('default');
+}catch (FileNotFoundException $e){
+    echo $e->getMessage();
 }
 
-$string = "Привет, мой email адрес: example@example.com. Буду рад получить ваше письмо. Мой друг email@example.com также ждет ваших новостей. Напишите нам скорее!";
-$emails = getEmails($string);
+if (isset($logger)){
+    try {
+        $newDate = DateConvertor::convertDateFormat($date, $from_format, $to_format);
 
-echo "Найденные email адреса:\n";
-print_r($emails);
+        $logger->info(sprintf('Get: [%s] from [%s]', $newDate, $date));
+    }catch (InvalidInputException $e){
+        $logger->error($e->getMessage());
+    }
+
+}
