@@ -2,48 +2,37 @@
 
 declare(strict_types=1);
 
-require_once 'autoloader.php';
+require_once 'vendor/autoload.php';
 
-use App\Data\User;
+use Psr\Log\LoggerInterface;
+use App\Logger\Logger;
 
-function generate_array(): array
+function get_result_message(mixed $value, string $search_string): string
 {
-    $data = array();
-
-    for ($i = 0; $i < 40; $i++) {
-        $age = random_int(1, 30);
-
-        $name = sprintf('%d ne %d xd', $age, $age);
-        $data[] = new User($name, $age);
+    if ($value === false){
+        $message = sprintf('no %s in array was', $search_string);
+    }else{
+        $message = sprintf('found %s in array at index %s', $search_string, $value);
     }
 
-    return $data;
+    return $message;
 }
 
-function is_elder(User $user): bool
+function searching(string $search, array $strings, LoggerInterface $logger): void
 {
-    return !($user->getAge() < 18);
+    $res = array_search($search, $strings, true);
+    $message = get_result_message($res, $search);
+
+    $logger->info($message);
 }
 
-function filter_array_by_age(array $arr): array
-{
-    return array_filter($arr, 'is_elder');
-}
+$logger = new Logger('default');
 
-function print_array(array $arr): void
-{
-    foreach ($arr as $item) {
-        echo $item;
-    }
-}
+$data = [
+    'mom', 'dad', 'brother', 'sister', 'aunt', 'uncle',
+    'red', 'blue', 'white', 'white beard', 'mom cool'
+];
 
-$data = generate_array();
+searching('mom cool', $data, $logger);
 
-echo 'non filtered<br>';
-print_array($data);
-echo '<br><br>';
 
-$filtered = filter_array_by_age($data);
-
-echo 'filtered<br>';
-print_array($filtered);
