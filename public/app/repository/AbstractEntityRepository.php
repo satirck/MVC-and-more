@@ -32,6 +32,9 @@ abstract class AbstractEntityRepository implements RepositoryInterface
         return $entities;
     }
 
+    /**
+     * @throws EntityNotFoundException
+     */
     public function getEntityById(int $id): ?AbstractEntity
     {
         $entities = $this->getAllEntities();
@@ -45,17 +48,19 @@ abstract class AbstractEntityRepository implements RepositoryInterface
         throw new EntityNotFoundException("Entity with ID $id not found.");
     }
 
-    public function saveEntity(string $entity): void
+    public function saveEntity(string $entity): string
     {
-        $entityObject = $this->deserializeEntity($entity);
-
         $entities = $this->getAllEntities();
 
-        foreach ($entities as $existingEntity) {
-            if ($existingEntity->getId() === $entityObject->getId()) {
-                throw new DuplicateEntityException("Entity with ID {$entityObject->getId()} already exists.");
-            }
+        if (!empty($entities)) {
+            $lastEntity = end($entities);
+            $newId = $lastEntity->getId() + 1;
+        } else {
+            $newId = 1;
         }
+
+        $entityObject = $this->deserializeEntity($entity);
+        $entityObject->setId($newId);
 
         $entities[] = $entityObject;
 
@@ -64,6 +69,8 @@ abstract class AbstractEntityRepository implements RepositoryInterface
         } catch (FileWriteException $e) {
             throw new RuntimeException("Failed to save entity: " . $e->getMessage(), $e->getCode(), $e);
         }
+
+        return json_encode($entityObject);
     }
 
     public function deleteEntity(int $id): void
@@ -114,9 +121,10 @@ abstract class AbstractEntityRepository implements RepositoryInterface
     {
         $entityClass = $this->entityClass;
 
-
+        if (is_subclass_of($entityClass, AbstractEntity::class)) {
             return $entityClass::fromJson($entity);
+        }
 
-
+        throw new InvalidArgumentException("$entityClass must be a subclass of AbstractEntity.");
     }
 }

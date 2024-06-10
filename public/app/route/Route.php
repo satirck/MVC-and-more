@@ -99,7 +99,9 @@ class Route
                 $typeName = $type->getName();
                 $value = $params[$name];
 
-                if ($typeName === 'int' && !is_int($value)) {
+                if (class_exists($typeName) && method_exists($typeName, 'fromJson')) {
+                    $params[$name] = $typeName::fromJson(json_encode($value));
+                } elseif ($typeName === 'int' && !is_int($value)) {
                     if (is_numeric($value)) {
                         $params[$name] = (int)$value;
                     } else {
@@ -117,7 +119,7 @@ class Route
     /**
      * @throws ReflectionException
      */
-    static function run(string $controller, string $action, array $params, string $method): void
+    static function run(string $controller, string $action, array $params): void
     {
         $controllerInstance = new $controller();
         $reflectionMethod = new ReflectionMethod($controller, $action);
@@ -148,11 +150,15 @@ class Route
         $action = $ctrlAndAction[1];
         $params = self::getParams($path, $ctrlAndAction[2]);
 
+        if ($method === 'POST') {
+            $input = json_decode(file_get_contents('php://input'), TRUE);
+            $params += $input;
+        }
+
         self::run(
             $controller,
             $action,
             $params,
-            $method
         );
     }
 }

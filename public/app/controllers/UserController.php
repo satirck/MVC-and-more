@@ -4,50 +4,54 @@ declare(strict_types=1);
 
 namespace App\controllers;
 
+use App\models\User;
+use App\repository\EntityNotFoundException;
+use App\repository\UserRepository;
+use App\route\StatusError;
 use App\attributes\{MethodRote};
 use Exception;
 
 class UserController implements RestControllerInterface
 {
-    protected array $users = [
-        ['name' => 'Mikita', 'age' => 20],
-        ['name' => 'John Doe', 'age' => 20],
-        ['name' => 'Jane Doe', 'age' => 20],
-    ];
+
+    protected UserRepository $userRepository;
+
+    public function __construct()
+    {
+        $this->userRepository = new UserRepository();
+    }
 
     #[MethodRote('GET', '/users')]
     public function index(): void
     {
         echo 'Hi at users page<br>Users: ';
-        print_r($this->users);
+
+        $users = $this->userRepository->getAllEntities();
+        print_r($users);
     }
 
     /**
      * @throws Exception
      */
-    #[MethodRote('GET', '/users/{sId}')]
-    public function getUserById(int $sId): void
+    #[MethodRote('GET', '/users/{id}')]
+    public function getUserById(int $id): void
     {
-        $id = intval($sId);
-
-        if (!array_key_exists($id, $this->users)) {
-            throw new Exception('User not found');
+        try {
+            $user = $this->userRepository->getEntityById($id);
+            echo 'Hi at user page.<br>';
+            print_r($user);
+        }catch (EntityNotFoundException $exception){
+            throw new StatusError(404, $exception->getMessage());
         }
-
-        echo 'Hi at user page<br>User: ';
-        print_r($this->users[$id]);
     }
 
-//    #[MethodRote('POST', '/users}')]
-//    public function createUser(User $user): void
-//    {
-//        $id = intval($sId);
-//
-//        if (!array_key_exists($id, $this->users)) {
-//            throw new Exception('User not found');
-//        }
-//
-//        echo 'Hi at user page<br>User: ';
-//        print_r($this->users[$id]);
-//    }
+    #[MethodRote('POST', '/users')]
+    public function createUser(User $user): void
+    {
+        $savedUser = $this->userRepository->saveEntity(json_encode($user));
+
+        echo 'Saved user is: <br>';
+        print_r($savedUser);
+    }
+
 }

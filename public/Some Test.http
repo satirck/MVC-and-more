@@ -1,4 +1,11 @@
-### GET request to example server
-POST localhost
-user: {}
+### POST request to example server
+POST localhost/users
+
+{
+    "user": {
+        "id": -1,
+        "name": "Http Resp Name",
+        "email": "retd$cool.ry"
+    }
+}
 ###
