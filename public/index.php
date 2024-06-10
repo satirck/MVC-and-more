@@ -2,48 +2,56 @@
 
 declare(strict_types=1);
 
-require_once 'autoloader.php';
+function filter_by_product($sales, $product): array{
+    return array_filter($sales, static function($sale) use ($product) {
+        return $sale['product'] === $product;
+    });
+}
 
-use App\Data\User;
-
-function generate_array(): array
-{
-    $data = array();
-
-    for ($i = 0; $i < 40; $i++) {
-        $age = random_int(1, 30);
-
-        $name = sprintf('%d ne %d xd', $age, $age);
-        $data[] = new User($name, $age);
+function total_sales_by_product($sales): array {
+    $productSales = [];
+    foreach ($sales as $sale) {
+        if (!isset($productSales[$sale['product']])) {
+            $productSales[$sale['product']] = 0;
+        }
+        $productSales[$sale['product']] += $sale['amount'];
     }
-
-    return $data;
+    return $productSales;
 }
 
-function is_elder(User $user): bool
-{
-    return !($user->getAge() < 18);
+function getCountSalesByProduct($sales): array{
+    $products = array_column($sales, 'product');
+    return array_count_values($products);
 }
 
-function filter_array_by_age(array $arr): array
-{
-    return array_filter($arr, 'is_elder');
+function getTotalSales($sales): int {
+    return array_sum(array_column($sales, 'amount'));
 }
 
-function print_array(array $arr): void
-{
-    foreach ($arr as $item) {
-        echo $item;
-    }
-}
+$sales = [
+    ['date' => '2024-05-01', 'product' => 'A', 'amount' => 100],
+    ['date' => '2024-05-01', 'product' => 'B', 'amount' => 150],
+    ['date' => '2024-05-02', 'product' => 'A', 'amount' => 200],
+    ['date' => '2024-05-02', 'product' => 'C', 'amount' => 250],
+    ['date' => '2024-05-03', 'product' => 'A', 'amount' => 300],
+    ['date' => '2024-05-03', 'product' => 'B', 'amount' => 350],
+];
 
-$data = generate_array();
+$productASales = filter_by_product($sales, 'A');
 
-echo 'non filtered<br>';
-print_array($data);
-echo '<br><br>';
+$totalSalesByProduct = total_sales_by_product($sales);
 
-$filtered = filter_array_by_age($data);
+$countSalesByProduct = getCountSalesByProduct($sales);
 
-echo 'filtered<br>';
-print_array($filtered);
+$totalSales = getTotalSales($sales);
+
+echo 'Filtered by product A:<br>';
+print_r($productASales);
+
+echo 'Total V for each product:<br>';
+print_r($totalSalesByProduct);
+
+echo 'Products sales:<br>';
+print_r($countSalesByProduct);
+
+
