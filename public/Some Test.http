@@ -4,8 +4,8 @@ POST localhost/users
 {
     "user": {
         "id": -1,
-        "name": "Http Resp Name",
-        "email": "retd$cool.ry"
+        "name": "Http Resp Name2",
+        "email": "mail.google$google.com"
     }
 }
 ###

@@ -48,6 +48,9 @@ abstract class AbstractEntityRepository implements RepositoryInterface
         throw new EntityNotFoundException("Entity with ID $id not found.");
     }
 
+    /**
+     * @throws
+     */
     public function saveEntity(string $entity): string
     {
         $entities = $this->getAllEntities();
