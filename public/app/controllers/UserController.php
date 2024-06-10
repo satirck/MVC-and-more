@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\controllers;
 
-use App\Attributes\{ControllerRote, MethodRote};
+use App\Attributes\{MethodRote};
 use Exception;
 
-#[ControllerRote('/users','/^\/users(\/\d+)?$/')]
-class UserController
+class UserController implements RestControllerInterface
 {
     protected array $users = [
         ['name' => 'Mikita', 'age' => 20],
@@ -16,11 +15,27 @@ class UserController
         ['name' => 'Jane Doe', 'age' => 20],
     ];
 
-    #[MethodRote('GET', '/^\/users$/')]
+    #[MethodRote('GET', '/users')]
     public function index(): void
     {
         echo 'Hi at users page<br>Users: ';
         print_r($this->users);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[MethodRote('GET', '/users/{sId}')]
+    public function getUserById(string $sId): void
+    {
+        $id = intval($sId);
+
+        if (!array_key_exists($id, $this->users)) {
+            throw new Exception('User not found');
+        }
+
+        echo 'Hi at user page<br>User: ';
+        print_r($this->users[$id]);
     }
 
 }

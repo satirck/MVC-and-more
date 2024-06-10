@@ -4,18 +4,14 @@ declare(strict_types=1);
 
 namespace App\controllers;
 
-use App\Attributes\{ControllerRote, MethodRote};
+use App\Attributes\MethodRote;
 
-#[ControllerRote('/','/^\/$/')]
-class HomeController
+class HomeController implements RestControllerInterface
 {
-    #[MethodRote('GET', '/^\/$/')]
+    #[MethodRote('GET', '/')]
     public function index(): void
     {
         echo 'Hello World at home!<br>';
     }
 
-    public function index2(): void{
-
-    }
 }

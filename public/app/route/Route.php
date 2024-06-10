@@ -4,46 +4,46 @@ declare(strict_types=1);
 
 namespace App\route;
 
-use App\Attributes\ControllerRote;
-use App\Attributes\MethodRote;
+use InvalidArgumentException;
+use App\Attributes\{MethodRote};
 use App\controllers\{HomeController, UserController};
+
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 
 class Route
 {
-
-    /**
-     * @throws ReflectionException
-     * @throws StatusError
-     */
-    static function getController(string $path, array $routesControllers): string
+    static function createRegular(string $pattern): string
     {
-        foreach ($routesControllers as $controller) {
-            $reflectionClass = new ReflectionClass($controller);
+        $regex = preg_replace('/\{(\w+)}/', '(?P<\1>\d+)', $pattern);
+        $regex = str_replace('/', '\/', $regex);
 
-            $attribute = $reflectionClass->getAttributes(ControllerRote::class)[0]->newInstance();
-
-            $urlPattern = $attribute->getRegPattern();
-
-            if (!preg_match($urlPattern, $path)) {
-                continue;
-            }
-
-            return $controller;
-        }
-
-        throw new StatusError(404, 'Url pattern not found');
+        return sprintf('/^%s$/', $regex);
     }
 
     /**
      * @throws ReflectionException
      * @throws StatusError
      */
-    static function getAction(string $controller, string $reqMethod, string $path): string
+    static function getController(string $path, string $method, array $routesControllers): array
     {
-        $reflectionClass = new ReflectionClass($controller);
+        foreach ($routesControllers as $controller) {
+            $reflectionClass = new ReflectionClass($controller);
+
+            $actionAndRegular = self::getActionAndRegular($reflectionClass, $method, $path);
+            if ($actionAndRegular !== null) {
+                return [
+                    $controller, $actionAndRegular[0], $actionAndRegular[1]
+                ];
+            }
+        }
+
+        throw new StatusError(404, 'Url not found...');
+    }
+
+    static function getActionAndRegular(ReflectionClass $reflectionClass, string $reqMethod, string $path): array|null
+    {
         $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
 
         foreach ($methods as $method) {
@@ -56,9 +56,11 @@ class Route
 
             $httpMethod = $attribute->getHttpMethod();
             $httpMethodReg = sprintf('/^%s$/', $httpMethod);
-            $urlPattern = $attribute->getUrlPattern();
 
-            if (!preg_match($httpMethodReg, $httpMethod)) {
+            $urlPath = $attribute->getUrlPattern();
+            $urlPattern = self::createRegular($urlPath);
+
+            if (!preg_match($httpMethodReg, $reqMethod)) {
                 continue;
             }
 
@@ -66,23 +68,71 @@ class Route
                 continue;
             }
 
-            return $method->getName();
+            return [$method->getName(), $urlPattern];
         }
 
-        throw new StatusError(404, 'Url method not found');
+        return null;
     }
 
-    static function getParams(string $action, string $controller): array
+    static function getParams(string $url, string $regex): array
     {
-        return array();
+        if (preg_match($regex, $url, $matches)) {
+            return array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
+        }
+
+        return [];
     }
 
+    static function validateParams(array $params, array $reflectionParams): array
+    {
+        foreach ($reflectionParams as $reflectionParam) {
+            $name = $reflectionParam->getName();
+            if (!isset($params[$name])) {
+                if ($reflectionParam->isOptional()) {
+                    continue;
+                }
+                throw new InvalidArgumentException("Missing parameter: $name");
+            }
+
+            $type = $reflectionParam->getType();
+            if ($type !== null) {
+                $typeName = $type->getName();
+                $value = $params[$name];
+
+                if ($typeName === 'int' && !is_int($value)) {
+                    if (is_numeric($value)) {
+                        $params[$name] = (int)$value;
+                    } else {
+                        throw new InvalidArgumentException("Invalid type for parameter: $name. Expected int.");
+                    }
+                } elseif ($typeName === 'string' && !is_string($value)) {
+                    throw new InvalidArgumentException("Invalid type for parameter: $name. Expected string.");
+                }
+
+
+            }
+        }
+
+        return $params;
+    }
+
+    /**
+     * @throws ReflectionException
+     */
     static function run(string $controller, string $action, array $params): void
     {
-        $controller = new $controller();
-        $controller->$action();
+        $controllerInstance = new $controller();
+        $reflectionMethod = new ReflectionMethod($controller, $action);
+        $reflectionParams = $reflectionMethod->getParameters();
 
-        //$controller->$action($params);
+        try {
+            $validatedParams = self::validateParams($params, $reflectionParams);
+        } catch (InvalidArgumentException $e) {
+            die($e->getMessage());
+        }
+
+
+        $controllerInstance->$action(...$validatedParams);
     }
 
     /**
@@ -96,15 +146,15 @@ class Route
             UserController::class,
         ];
 
-        $controller = self::getController($path, $routesControllers);
-        $action = self::getAction($controller, $method, $path);
-        $params = self::getParams($action, $controller);
+        $ctrlAndAction = self::getController($path, $method, $routesControllers);
+        $controller = $ctrlAndAction[0];
+        $action = $ctrlAndAction[1];
+        $params = self::getParams($path, $ctrlAndAction[2]);
 
         self::run(
             $controller,
             $action,
-            []
+            $params
         );
     }
 }
-
