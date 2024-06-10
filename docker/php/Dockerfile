@@ -4,4 +4,4 @@ COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html/public
 
-RUN composer require phpmailer/phpmailer
+RUN composer require psr/log

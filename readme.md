@@ -1,16 +1,15 @@
 Task:
 
-Фильтрация массива:
+Создайте массив, содержащий несколько элементов.
 
-Создайте массив, содержащий имена пользователей и их возраст.
+Используйте unset(), array_splice(), or array_shift() or array_pop() для удаления specific elements from the array.
 
-Используйте array_filter() для создания нового массива, содержащего только пользователей старше 18 лет.
+Выведите массив после удаления элементов.
 
-Выведите новый массив.
 
 Requirements:
 
-    OS with docker installed on it
+* OS with docker installed on it
 
 
 Steps:

@@ -2,48 +2,28 @@
 
 declare(strict_types=1);
 
-require_once 'autoloader.php';
+$arr1 = range(1, 10);
 
-use App\Data\User;
 
-function generate_array(): array
-{
-    $data = array();
+$copy = $arr1;
 
-    for ($i = 0; $i < 40; $i++) {
-        $age = random_int(1, 30);
-
-        $name = sprintf('%d ne %d xd', $age, $age);
-        $data[] = new User($name, $age);
-    }
-
-    return $data;
-}
-
-function is_elder(User $user): bool
-{
-    return !($user->getAge() < 18);
-}
-
-function filter_array_by_age(array $arr): array
-{
-    return array_filter($arr, 'is_elder');
-}
-
-function print_array(array $arr): void
-{
-    foreach ($arr as $item) {
-        echo $item;
-    }
-}
-
-$data = generate_array();
-
-echo 'non filtered<br>';
-print_array($data);
+print_r($copy);
 echo '<br><br>';
 
-$filtered = filter_array_by_age($data);
+unset($copy);
 
-echo 'filtered<br>';
-print_array($filtered);
+//error, no such variable
+//print_r($copy);
+
+$arr2 = $arr1;
+
+array_splice($arr2, 4, 5);
+
+print_r($arr2);
+echo '<br><br>';
+
+//removes 1 elemnt from bottom, offset doesn`t make effects
+array_splice($arr2, -3, -1);
+
+print_r($arr2);
+echo '<br><br>';
