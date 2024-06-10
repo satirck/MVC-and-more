@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\controllers;
 
-use App\Attributes\{MethodRote};
+use App\attributes\{MethodRote};
 use Exception;
 
 class UserController implements RestControllerInterface
@@ -26,7 +26,7 @@ class UserController implements RestControllerInterface
      * @throws Exception
      */
     #[MethodRote('GET', '/users/{sId}')]
-    public function getUserById(string $sId): void
+    public function getUserById(int $sId): void
     {
         $id = intval($sId);
 
@@ -38,4 +38,16 @@ class UserController implements RestControllerInterface
         print_r($this->users[$id]);
     }
 
+//    #[MethodRote('POST', '/users}')]
+//    public function createUser(User $user): void
+//    {
+//        $id = intval($sId);
+//
+//        if (!array_key_exists($id, $this->users)) {
+//            throw new Exception('User not found');
+//        }
+//
+//        echo 'Hi at user page<br>User: ';
+//        print_r($this->users[$id]);
+//    }
 }

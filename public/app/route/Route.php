@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\route;
 
 use InvalidArgumentException;
-use App\Attributes\{MethodRote};
+use App\attributes\{MethodRote};
 use App\controllers\{HomeController, UserController};
 
 use ReflectionClass;
@@ -108,8 +108,6 @@ class Route
                 } elseif ($typeName === 'string' && !is_string($value)) {
                     throw new InvalidArgumentException("Invalid type for parameter: $name. Expected string.");
                 }
-
-
             }
         }
 
@@ -119,7 +117,7 @@ class Route
     /**
      * @throws ReflectionException
      */
-    static function run(string $controller, string $action, array $params): void
+    static function run(string $controller, string $action, array $params, string $method): void
     {
         $controllerInstance = new $controller();
         $reflectionMethod = new ReflectionMethod($controller, $action);
@@ -130,7 +128,6 @@ class Route
         } catch (InvalidArgumentException $e) {
             die($e->getMessage());
         }
-
 
         $controllerInstance->$action(...$validatedParams);
     }
@@ -154,7 +151,8 @@ class Route
         self::run(
             $controller,
             $action,
-            $params
+            $params,
+            $method
         );
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\controllers;
 
-use App\Attributes\MethodRote;
+use App\attributes\MethodRote;
 
 class HomeController implements RestControllerInterface
 {
