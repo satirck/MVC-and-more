@@ -1,0 +1,12 @@
+services:
+
+  php:
+    build: ./php
+    ports:
+      - 80:80
+    volumes:
+      - ../:/var/www/html
+    working_dir: /var/www/html/public
+    entrypoint: [ "php", "-S", "0.0.0.0:80" ]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

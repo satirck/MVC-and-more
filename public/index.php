@@ -2,48 +2,28 @@
 
 declare(strict_types=1);
 
-require_once 'autoloader.php';
+require_once('vendor/autoload.php');
 
-use App\Data\User;
+use App\Logger\{Logger, FileNotFoundException};
+use App\Strings\{DateConvertor, InvalidInputException};
 
-function generate_array(): array
-{
-    $data = array();
+$from_format = 'd.m.Y';
+$to_format = 'Y-m-d';
+$date = '02.04.2004';
 
-    for ($i = 0; $i < 40; $i++) {
-        $age = random_int(1, 30);
+try {
+    $logger = new Logger('default');
+}catch (FileNotFoundException $e){
+    echo $e->getMessage();
+}
 
-        $name = sprintf('%d ne %d xd', $age, $age);
-        $data[] = new User($name, $age);
+if (isset($logger)){
+    try {
+        $newDate = DateConvertor::convertDateFormat($date, $from_format, $to_format);
+
+        $logger->info(sprintf('Get: [%s] from [%s]', $newDate, $date));
+    }catch (InvalidInputException $e){
+        $logger->error($e->getMessage());
     }
 
-    return $data;
 }
-
-function is_elder(User $user): bool
-{
-    return !($user->getAge() < 18);
-}
-
-function filter_array_by_age(array $arr): array
-{
-    return array_filter($arr, 'is_elder');
-}
-
-function print_array(array $arr): void
-{
-    foreach ($arr as $item) {
-        echo $item;
-    }
-}
-
-$data = generate_array();
-
-echo 'non filtered<br>';
-print_array($data);
-echo '<br><br>';
-
-$filtered = filter_array_by_age($data);
-
-echo 'filtered<br>';
-print_array($filtered);
