@@ -1,7 +1,7 @@
 services:
 
   php:
-    image: php:8.1-fpm-alpine
+    build: ./php
     ports:
       - 80:80
     volumes:

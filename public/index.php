@@ -2,48 +2,57 @@
 
 declare(strict_types=1);
 
-require_once 'autoloader.php';
-
-use App\Data\User;
-
-function generate_array(): array
+function array_copy(array $arr, int $start, int $stop): array
 {
-    $data = array();
+    return array_slice($arr, $start, $stop - $start);
+}
 
-    for ($i = 0; $i < 40; $i++) {
-        $age = random_int(1, 30);
-
-        $name = sprintf('%d ne %d xd', $age, $age);
-        $data[] = new User($name, $age);
+function merge(array $left, array $right): array
+{
+    $sorted = array();
+    $i = $j = 0;
+    while ($i < count($left) && $j < count($right)) {
+        if ($left[$i] < $right[$j]) {
+            $sorted[] = $left[$i];
+            $i++;
+        } else {
+            $sorted[] = $right[$j];
+            $j++;
+        }
     }
 
-    return $data;
-}
-
-function is_elder(User $user): bool
-{
-    return !($user->getAge() < 18);
-}
-
-function filter_array_by_age(array $arr): array
-{
-    return array_filter($arr, 'is_elder');
-}
-
-function print_array(array $arr): void
-{
-    foreach ($arr as $item) {
-        echo $item;
+    while ($i < count($left)) {
+        $sorted[] = $left[$i];
+        $i++;
     }
+
+    while ($j < count($right)) {
+        $sorted[] = $right[$j];
+        $j++;
+    }
+
+    return $sorted;
 }
 
-$data = generate_array();
+function merge_sort(array $arr): array
+{
+    $count = count($arr);
 
-echo 'non filtered<br>';
-print_array($data);
-echo '<br><br>';
+    if ($count < 2) {
+        return $arr;
+    }
 
-$filtered = filter_array_by_age($data);
+    $mid = (int)($count / 2);
 
-echo 'filtered<br>';
-print_array($filtered);
+    $left = merge_sort(array_copy($arr, 0, $mid));
+    $right = merge_sort(array_copy($arr, $mid, $count));
+
+    return merge($left, $right);
+}
+
+$nums = [5, 3, 2, 7, 8, 9, 20];
+
+$sorted_nums = merge_sort($nums);
+
+print_r($sorted_nums);
+
