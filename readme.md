@@ -1,16 +1,17 @@
 Task:
 
-Фильтрация массива:
+Функции для работы со строками в массивах:
 
-Создайте массив, содержащий имена пользователей и их возраст.
+Создайте массив, содержащий строки текста.
 
-Используйте array_filter() для создания нового массива, содержащего только пользователей старше 18 лет.
+Используйте функции array_map(), trim(), strtoupper(), strtolower() or str_replace() to manipulate the strings within the array.
 
-Выведите новый массив.
+Выведите массив с измененными строками.
+ 
 
 Requirements:
 
-    OS with docker installed on it
+* OS with docker installed on it
 
 
 Steps:
