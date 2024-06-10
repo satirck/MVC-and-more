@@ -1,23 +1,33 @@
 Task:
 
-Фильтрация массива:
+7. Работа с HTML-строками:
 
-Создайте массив, содержащий имена пользователей и их возраст.
+Напишите функцию, которая удаляет из HTML-строки все теги.
 
-Используйте array_filter() для создания нового массива, содержащего только пользователей старше 18 лет.
+Используйте регулярные выражения (preg_replace()) для выполнения задачи.
 
-Выведите новый массив.
+Проверьте работу функции на примерах с разными HTML-строками.
+
+Напишите функцию, которая извлекает из HTML-строки ссылки (URL-адреса).
+
+Используйте регулярные выражения (preg_match_all()) для выполнения задачи.
+
+Продемонстрируйте работу функции на примерах с разными HTML-строками.
 
 Requirements:
 
-    OS with docker installed on it
+* OS with docker installed on it
 
 
 Steps:
 
-RUN
+RUN FOR FIRST TIME
 
-    /bin/bash ./run.sh
+    /bin/bash ./run.sh 
+
+RUN FOR REBUILD
+
+    /bin/bash ./runb.sh 
 
 
 If all works you`ll see at http://localhost your web page with some text on it

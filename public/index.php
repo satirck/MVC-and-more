@@ -2,48 +2,41 @@
 
 declare(strict_types=1);
 
-require_once 'autoloader.php';
-
-use App\Data\User;
-
-function generate_array(): array
-{
-    $data = array();
-
-    for ($i = 0; $i < 40; $i++) {
-        $age = random_int(1, 30);
-
-        $name = sprintf('%d ne %d xd', $age, $age);
-        $data[] = new User($name, $age);
-    }
-
-    return $data;
+function removeHtmlTags(string $html): string {
+    return preg_replace('/<[.]*>/i', '', $html);
 }
 
-function is_elder(User $user): bool
-{
-    return !($user->getAge() < 18);
+function extractUrls(string $html): array {
+    $pattern = '/https?:\/\/[^\s"<>\']+/i';
+
+    preg_match_all($pattern, $html, $matches);
+
+    return $matches[0];
 }
 
-function filter_array_by_age(array $arr): array
-{
-    return array_filter($arr, 'is_elder');
-}
+$html_string = '
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    Hello world
+    <a href="http://localhost"></a>
+    <a href="https://vk.com"></a>
+</body>
+</html>';
 
-function print_array(array $arr): void
-{
-    foreach ($arr as $item) {
-        echo $item;
-    }
-}
+$escaped_html = htmlspecialchars($html_string, ENT_QUOTES, 'UTF-8');
+$clean_string = removeHtmlTags($html_string);
 
-$data = generate_array();
+echo sprintf('Original: %s<br><br>', $escaped_html);
+echo sprintf('Clean: %s<br><br>', $clean_string);
 
-echo 'non filtered<br>';
-print_array($data);
-echo '<br><br>';
+$urls = extractUrls($html_string);
 
-$filtered = filter_array_by_age($data);
-
-echo 'filtered<br>';
-print_array($filtered);
+echo 'Extracted urls: <br>';
+print_r($urls);
+echo '<br>';
