@@ -2,48 +2,93 @@
 
 declare(strict_types=1);
 
-require_once 'autoloader.php';
-
-use App\Data\User;
-
-function generate_array(): array
+function isValidEmail(string $email): bool
 {
-    $data = array();
+    $pattern = '/(^\S+)@(\S+)\.(\S+$)/';
 
-    for ($i = 0; $i < 40; $i++) {
-        $age = random_int(1, 30);
-
-        $name = sprintf('%d ne %d xd', $age, $age);
-        $data[] = new User($name, $age);
-    }
-
-    return $data;
+    return preg_match($pattern, $email) === 1;
 }
 
-function is_elder(User $user): bool
+function parseFromCapital($string): array
 {
-    return !($user->getAge() < 18);
+    $pattern = '/([A-Z].+)/m';
+
+    preg_match_all($pattern, $string, $matches);
+    return $matches[0];
 }
 
-function filter_array_by_age(array $arr): array
+function extractUrls(string $html): array
 {
-    return array_filter($arr, 'is_elder');
+    $pattern = '/https?:\/\/[^\s"<>\']+/i';
+
+    preg_match_all($pattern, $html, $matches);
+
+    return $matches[0];
 }
 
-function print_array(array $arr): void
+function extractBetweenSymbols(string $text): array
 {
-    foreach ($arr as $item) {
-        echo $item;
-    }
+    $pattern = '/(?<=,)[^,]+(?=,)/';
+
+    preg_match_all($pattern, $text, $matches);
+
+    return $matches[0];
 }
 
-$data = generate_array();
+function replaceToString(string $first, string $toSearch, string $toReplace): string
+{
+    return preg_replace($toSearch, $toReplace, $first);
+}
 
-echo 'non filtered<br>';
-print_array($data);
+$html_string = '
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    Hello world
+    <a href="http://localhost"></a>
+    <a href="https://vk.com"></a>
+</body>
+</html>';
+
+$email1 = 'retdarkw@gmail.com';
+$email2 = 'retdarkw.gmail@.com';
+
+$string = sprintf('Cool day%sCall me%scoach%sletter', PHP_EOL, PHP_EOL, PHP_EOL);
+$string2 = 'Hello, me friend, hello, cool day. Can we speak together, a, cool.';
+$string3 = 'Говоря привет, мы вежливо сообщаем что рады видеть человека. 
+Даже такое обращение как привет, может вызвать улыбку.';
+
+echo 'Mails: <br>';
+
+echo sprintf('Mail [%s] is %s mail<br>', $email1, isValidEmail($email1) ? 'valid' : 'invalid');
+echo sprintf('Mail [%s] is %s mail<br><br>', $email2, isValidEmail($email2) ? 'valid' : 'invalid');
+
+echo sprintf('Getting capitals from <br>%s', str_replace(PHP_EOL, '<br>', $string));
+
+$capitals = parseFromCapital($string);
+print_r($capitals);
+echo '<br>';
+
+$escaped_html = htmlspecialchars($html_string, ENT_QUOTES, 'UTF-8');
+$urls = extractUrls($html_string);
+
+echo sprintf('Original: %s<br><br>', $escaped_html);
+echo 'Extracted urls: <br>';
+print_r($urls);
 echo '<br><br>';
 
-$filtered = filter_array_by_age($data);
+$quBetween = extractBetweenSymbols($string2, ',');
 
-echo 'filtered<br>';
-print_array($filtered);
+echo sprintf('Original: %s<br>', $string2);
+echo 'Extracted between [,] : <br>';
+print_r($quBetween);
+echo '<br>';
+
+$newString3 = replaceToString($string3, '/привет/', 'здравствуй');
+echo sprintf('Original: %s<br>', $string3);
+echo sprintf('Replace [привет] на [здравствуй] : <br> %s<br>', $newString3);

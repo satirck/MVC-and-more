@@ -1,23 +1,33 @@
 Task:
 
-Фильтрация массива:
+9. Реализация алгоритмов обработки строк:
 
-Создайте массив, содержащий имена пользователей и их возраст.
+Реализуйте алгоритм поиска анаграмм слов.
 
-Используйте array_filter() для создания нового массива, содержащего только пользователей старше 18 лет.
+Используйте функции str_split(), sort(), array_diff() для выполнения задачи.
 
-Выведите новый массив.
+Протестируйте алгоритм на примерах с разными словами.
+
+Реализуйте алгоритм проверки палиндрома (строки, читающейся одинаково слева направо и справа налево).
+
+Используйте функции str_split(), strtolower(), array_diff() для выполнения задачи.
+
+Протестируйте алгоритм на примерах с разными строками.
 
 Requirements:
 
-    OS with docker installed on it
+* OS with docker installed on it
 
 
 Steps:
 
-RUN
+RUN FOR FIRST TIME
 
-    /bin/bash ./run.sh
+    /bin/bash ./run.sh 
+
+RUN FOR REBUILD
+
+    /bin/bash ./runb.sh 
 
 
 If all works you`ll see at http://localhost your web page with some text on it
