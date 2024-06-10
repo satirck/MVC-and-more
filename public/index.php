@@ -4,46 +4,43 @@ declare(strict_types=1);
 
 require_once 'autoloader.php';
 
-use App\Data\User;
+$str1 = 'Cool day';
+$str2 = 'Cool day';
 
-function generate_array(): array
-{
-    $data = array();
+$str3 = 'cool day';
 
-    for ($i = 0; $i < 40; $i++) {
-        $age = random_int(1, 30);
+$res1 = strcasecmp($str1, $str2);
 
-        $name = sprintf('%d ne %d xd', $age, $age);
-        $data[] = new User($name, $age);
-    }
+echo sprintf('Case independent: <br>Strings [%s] and [%s] are: %s<br>', $str1, $str2, $res1 == 0 ? 'equals' : 'not equals');
 
-    return $data;
+$res2 = strcasecmp($str2, $str3);
+
+echo sprintf('Strings [%s] and [%s] are: %s<br>', $str2, $str3, $res2 == 0 ? 'equals' : 'not equals');
+
+$res3 = strnatcmp($str2, $str3);
+
+echo sprintf('Case dependent: <br>Strings [%s] and [%s] are: %s<br>', $str2, $str3, $res3 == 0 ? 'equals' : 'not equals');
+
+function sortStrings(array &$strings, bool $isCI = true): void {
+    $cmpFunc = function ($a, $b) use ($isCI) {
+        return $isCI ? strnatcmp($a, $b) : strnatcmp($b, $a);
+    };
+
+    usort($strings, $cmpFunc);
 }
 
-function is_elder(User $user): bool
-{
-    return !($user->getAge() < 18);
-}
 
-function filter_array_by_age(array $arr): array
-{
-    return array_filter($arr, 'is_elder');
-}
+$strings = ["apple", "Banana", "grape", "cherry", "Apple", "banana"];
 
-function print_array(array $arr): void
-{
-    foreach ($arr as $item) {
-        echo $item;
-    }
-}
+sortStrings($strings);
 
-$data = generate_array();
+echo 'Sort by asc:<br>';
+print_r($strings);
+echo '<br>';
 
-echo 'non filtered<br>';
-print_array($data);
-echo '<br><br>';
 
-$filtered = filter_array_by_age($data);
+sortStrings($strings, false);
 
-echo 'filtered<br>';
-print_array($filtered);
+echo 'Sort by desc:<br>';
+print_r($strings);
+echo '<br>';
