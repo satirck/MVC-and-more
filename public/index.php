@@ -2,48 +2,36 @@
 
 declare(strict_types=1);
 
-require_once 'autoloader.php';
+function analyzeText($text) : void {
+    $wordCount = str_word_count($text);
+    $splitArr = explode(' ', $text);
+    $wordArr = str_word_count($text, 2);
 
-use App\Data\User;
-
-function generate_array(): array
-{
-    $data = array();
-
-    for ($i = 0; $i < 40; $i++) {
-        $age = random_int(1, 30);
-
-        $name = sprintf('%d ne %d xd', $age, $age);
-        $data[] = new User($name, $age);
-    }
-
-    return $data;
+    echo sprintf('Text is <br>%s<br>', $text);
+    echo sprintf('Word count is %s<br>', $wordCount);
+    echo sprintf('Word count by space separator %s<br>', count($splitArr));
+    print_r($wordArr);
+    echo '<br><br>';
 }
 
-function is_elder(User $user): bool
-{
-    return !($user->getAge() < 18);
+function removeDuplicates(string $text): string {
+    $words = explode(' ', $text);
+
+    $uniqueWords = array_unique($words);
+
+    return implode(' ', $uniqueWords);
 }
 
-function filter_array_by_age(array $arr): array
-{
-    return array_filter($arr, 'is_elder');
-}
+$text = 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi, placeat ullam aspernatur 
+architecto et, earum maxime vitae quam reiciendis sint ad velit delectus porro nulla aliquid non
+facilis perspiciatis autem. ';
 
-function print_array(array $arr): void
-{
-    foreach ($arr as $item) {
-        echo $item;
-    }
-}
+$text2 = 'My cool Dad. My cool Mum.';
 
-$data = generate_array();
+analyzeText($text2);
 
-echo 'non filtered<br>';
-print_array($data);
-echo '<br><br>';
+$res1 = removeDuplicates($text2);
+echo 'Unique: <br>';
 
-$filtered = filter_array_by_age($data);
+analyzeText($res1);
 
-echo 'filtered<br>';
-print_array($filtered);
