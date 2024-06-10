@@ -2,48 +2,38 @@
 
 declare(strict_types=1);
 
-require_once 'autoloader.php';
-
-use App\Data\User;
+require_once 'vendor/autoload.php';
 
 function generate_array(): array
 {
     $data = array();
 
     for ($i = 0; $i < 40; $i++) {
-        $age = random_int(1, 30);
-
-        $name = sprintf('%d ne %d xd', $age, $age);
-        $data[] = new User($name, $age);
+        $number = random_int(1, 30);
+        $data[] = $number;
     }
 
     return $data;
 }
 
-function is_elder(User $user): bool
-{
-    return !($user->getAge() < 18);
-}
+$logger = new App\Logger\Logger('default');
 
-function filter_array_by_age(array $arr): array
-{
-    return array_filter($arr, 'is_elder');
-}
+$nums = generate_array();
 
-function print_array(array $arr): void
-{
-    foreach ($arr as $item) {
-        echo $item;
-    }
-}
+$logger->info('Original array');
+var_dump($nums);
+echo '<br>';
 
-$data = generate_array();
+sort($nums);
 
-echo 'non filtered<br>';
-print_array($data);
-echo '<br><br>';
+$logger->info('Sorted array');
+var_dump($nums);
+echo '<br>';
 
-$filtered = filter_array_by_age($data);
+rsort($nums);
 
-echo 'filtered<br>';
-print_array($filtered);
+$logger->info('Reverse sorted array');
+var_dump($nums);
+echo '<br>';
+
+
