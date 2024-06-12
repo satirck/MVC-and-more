@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\repository;
+namespace App\Repository;
 
-use RuntimeException;
+use App\Models\AbstractEntity;
+use App\Repository\Exceptions\EntityNotFoundException;
+use App\Repository\Exceptions\FileReadException;
+use App\Repository\Exceptions\FileWriteException;
 use InvalidArgumentException;
-use App\models\AbstractEntity;
+use RuntimeException;
 
 abstract class AbstractEntityRepository implements RepositoryInterface
 {
@@ -20,7 +23,7 @@ abstract class AbstractEntityRepository implements RepositoryInterface
         }
     }
 
-    public function getAllEntities(): array
+    public function getAll(): array
     {
         $entitiesData = $this->readFromFile();
 
@@ -35,9 +38,9 @@ abstract class AbstractEntityRepository implements RepositoryInterface
     /**
      * @throws EntityNotFoundException
      */
-    public function getEntityById(int $id): ?AbstractEntity
+    public function getById(int $id): ?AbstractEntity
     {
-        $entities = $this->getAllEntities();
+        $entities = $this->getAll();
 
         foreach ($entities as $entity) {
             if ($entity->getId() === $id) {
@@ -51,9 +54,9 @@ abstract class AbstractEntityRepository implements RepositoryInterface
     /**
      * @throws
      */
-    public function saveEntity(string $entity): string
+    public function save(string $entity): string
     {
-        $entities = $this->getAllEntities();
+        $entities = $this->getAll();
 
         if (!empty($entities)) {
             $lastEntity = end($entities);
@@ -76,9 +79,9 @@ abstract class AbstractEntityRepository implements RepositoryInterface
         return json_encode($entityObject);
     }
 
-    public function deleteEntity(int $id): void
+    public function delete(int $id): void
     {
-        $entities = $this->getAllEntities();
+        $entities = $this->getAll();
         $entities = array_filter($entities, function ($entity) use ($id) {
             return $entity->getId() !== $id;
         });

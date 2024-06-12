@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\attributes;
+namespace App\Route\Attributes;
 
 use Attribute;
 
 #[Attribute(Attribute::TARGET_METHOD,)]
-class MethodRote
+class MethodRouteAttribute
 {
     public function __construct(
         protected string $httpMethod,
@@ -25,5 +25,4 @@ class MethodRote
     {
         return $this->urlPattern;
     }
-
 }

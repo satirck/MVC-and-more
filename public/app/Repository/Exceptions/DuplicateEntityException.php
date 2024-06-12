@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\repository;
+namespace App\Repository\Exceptions;
 
 use RuntimeException;
 

@@ -1,11 +1,19 @@
-### POST request to example server
-POST localhost/users
-
-{
-    "user": {
-        "id": -1,
-        "name": "Http Resp Name2",
-        "email": "mail.google$google.com"
-    }
-}
 ###
+//get home view
+GET localhost/
+###
+
+###
+GET localhost/users
+###
+
+###
+POST localhost/users
+Content-Type: application/x-www-form-urlencoded
+
+user = %7B%22id%22%3A1%2C%22name%22%3A%22Mikita%22%2C%22email%22%3A%22retdarkw%40gmail.com%22%7D
+###
+
+
+
+
