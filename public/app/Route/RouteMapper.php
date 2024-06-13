@@ -4,13 +4,24 @@ declare(strict_types=1);
 
 namespace App\Route;
 
-use App\Route\Exceptions\InvalidRouteArgumentException;
-use App\Route\Attributes\{DomainKeyAttribute, MethodRouteAttribute};
-use App\Route\Entities\ActionEntity;
-use App\Route\Entities\ControllerEntity;
-use App\Route\Entities\RouteEntity;
-use App\Route\Exceptions\StatusErrorException;
-use InvalidArgumentException;
+use App\Route\Exceptions\{
+    InvalidRouteArgumentException,
+    MissingRouteArgumentException,
+    StatusErrorException
+};
+
+use App\Route\Attributes\{
+    DomainKeyAttribute,
+    MethodRouteAttribute
+};
+
+use App\Route\Entities\{
+    ActionEntity,
+    ControllerEntity,
+    RouteEntity,
+    MethodParam
+};
+
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -19,6 +30,8 @@ class RouteMapper
 {
     private array $routesControllers;
     private const REQUEST_INDEX = 'request';
+    private const DOMAIN_KEY_SPECIAL = 'special';
+    private const DOMAIN_KEY_GENERAL = 'general';
 
     /**
      * @throws ReflectionException
@@ -30,16 +43,23 @@ class RouteMapper
         $this->routesControllers = $this->getControllers();
     }
 
-    private function getControllerFiles(): array
+    private function getControllerFiles(string $folder): array
     {
         $returnFiles = [];
 
-        if (is_dir($this->controllersFolder)) {
-            $files = scandir($this->controllersFolder);
+        if (is_dir($folder)) {
+            $files = scandir($folder);
+
             foreach ($files as $file) {
-                $filePath = $this->controllersFolder . DIRECTORY_SEPARATOR . $file;
+                $filePath = $folder . DIRECTORY_SEPARATOR . $file;
+
                 if (is_file($filePath) && pathinfo($filePath, PATHINFO_EXTENSION) === 'php') {
                     $returnFiles[] = $filePath;
+                    continue;
+                }
+
+                if (is_dir($filePath) && $file != '.' && $file != '..'){
+                    $some = $this->getControllerFiles($filePath);
                 }
             }
         }
@@ -54,7 +74,7 @@ class RouteMapper
     private function getControllersEntities(): array
     {
         $controllersEntities = [];
-        $files = $this->getControllerFiles();
+        $files = $this->getControllerFiles($this->controllersFolder);
 
         foreach ($files as $file) {
             require_once $file;
@@ -71,7 +91,11 @@ class RouteMapper
                     }
 
                     $domainKeyInst = $domainKeyAttribute[0]->newInstance();
-                    $controllersEntities[] = new ControllerEntity($reflector->getName(), $domainKeyInst->domainKey);
+
+                    $controllersEntities[] = new ControllerEntity(
+                        $reflector->getName(),
+                        $domainKeyInst->domainKey
+                    );
                 }
             }
         }
@@ -86,13 +110,13 @@ class RouteMapper
     {
         $controllersEntities = $this->getControllersEntities();
         $controllers = [
-            'special' => [],
-            'general' => []
+            self::DOMAIN_KEY_SPECIAL => [],
+            self::DOMAIN_KEY_GENERAL => []
         ];
 
         foreach ($controllersEntities as $controllerEntity) {
-            $controllers['special'][$controllerEntity->domainKey][] = $controllerEntity->controller;
-            $controllers['general'][] = $controllerEntity->controller;
+            $controllers[self::DOMAIN_KEY_SPECIAL][$controllerEntity->domainKey][] = $controllerEntity->controller;
+            $controllers[self::DOMAIN_KEY_GENERAL][] = $controllerEntity->controller;
         }
 
         return $controllers;
@@ -139,9 +163,9 @@ class RouteMapper
     {
         $firstKey = $this->getUrlDomainKey($path);
 
-        if (isset($this->routesControllers['special'][$firstKey])) {
+        if (isset($this->routesControllers[self::DOMAIN_KEY_SPECIAL][$firstKey])) {
             $routeEntity = $this->getRouteEntityFromControllersArray(
-                $this->routesControllers['special'][$firstKey],
+                $this->routesControllers[self::DOMAIN_KEY_SPECIAL][$firstKey],
                 $path,
                 $method
             );
@@ -152,7 +176,7 @@ class RouteMapper
         }
 
         $routeEntity = $this->getRouteEntityFromControllersArray(
-            $this->routesControllers['general'],
+            $this->routesControllers[self::DOMAIN_KEY_GENERAL],
             $path,
             $method
         );
@@ -210,43 +234,90 @@ class RouteMapper
     }
 
     /**
+     * @throws ReflectionException
+     */
+    private function getMethodParams(RouteEntity $routeEntity): array
+    {
+        $methodParams = [];
+
+        $reflectionMethod = new ReflectionMethod($routeEntity->controller, $routeEntity->action);
+        $reflectionParams = $reflectionMethod->getParameters();
+
+        foreach ($reflectionParams as $reflectionParam) {
+            $type = $reflectionParam->getType();
+
+            if ($type !== null) {
+                $methodParams[] = new MethodParam(
+                    $type->getName(),
+                    $reflectionParam->isOptional(),
+                    $reflectionParam->getName()
+                );
+            }
+
+        }
+
+        return $methodParams;
+    }
+
+    /**
+     * @param array $params -> params from request
+     * @param MethodParam[] $reqMethodParams
+     *
+     * @throws MissingRouteArgumentException
+     */
+    private function checkParamSet(array $params, array $reqMethodParams): void
+    {
+        foreach ($reqMethodParams as $methodParam) {
+            $name = $methodParam->name;
+            $isOptional = $methodParam->optional;
+
+            if (!isset($params[$name]) && !isset($params[self::REQUEST_INDEX][$name])) {
+                if ($isOptional) {
+                    continue;
+                }
+
+                throw new MissingRouteArgumentException(
+                    sprintf('Missing parameter: %s', $name),
+                    404
+                );
+            }
+        }
+
+    }
+
+    /**
+     * @param array $params
+     * @param MethodParam[] $reqMethodParams
+     * @return array
+     *
      * @throws InvalidRouteArgumentException
      */
-    private function validateParams(array $params, array $reflectionParams): array
+    private function castParams(array $params, array $reqMethodParams): array
     {
         $newParams = [];
 
-        foreach ($reflectionParams as $reflectionParam) {
-            $name = $reflectionParam->getName();
-            if (!isset($params[$name]) && !isset($params[self::REQUEST_INDEX][$name])) {
-                if ($reflectionParam->isOptional()) {
-                    continue;
-                }
-                throw new InvalidRouteArgumentException("Missing parameter: $name", 404);
+        foreach ($reqMethodParams as $methodParams) {
+            $name = $methodParams->name;
+            $typeName = $methodParams->typename;
+            $value = $params[$name] ?? $params[self::REQUEST_INDEX][$name];
+
+            if (class_exists($typeName) && method_exists($typeName, 'fromJson')) {
+                $newParams[$name] = $typeName::fromJson($value);
+                continue;
             }
 
-            $type = $reflectionParam->getType();
-            if ($type !== null) {
-                $typeName = $type->getName();
-                $value = $params[$name] ?? $params[self::REQUEST_INDEX][$name];
-
-                if (class_exists($typeName) && method_exists($typeName, 'fromJson')) {
-                    $newParams[$name] = $typeName::fromJson($value);
+            if ($typeName === 'int') {
+                if (is_int($value)) {
                     continue;
                 }
 
-                if ($typeName === 'int') {
-                    $newParams[$name] = (int) $value;
+                if (is_numeric($value)) {
+                    $newParams[$name] = (int)$value;
                     continue;
                 }
-
-                if ($typeName === 'string') {
-                    $newParams[$name] = $value;
-
-                }
-
-                throw new InvalidRouteArgumentException("Missing parameter: $name", 404);
             }
+
+            throw new InvalidRouteArgumentException();
         }
 
         return $newParams;
@@ -255,18 +326,32 @@ class RouteMapper
     /**
      * @throws ReflectionException
      * @throws InvalidRouteArgumentException
+     * @throws StatusErrorException
      *
      */
-    private function run(string $controller, string $action, array $params): void
+    private function run(RouteEntity $routeEntity, array $params): void
     {
-        $reflectionMethod = new ReflectionMethod($controller, $action);
-        $reflectionParams = $reflectionMethod->getParameters();
+        $methodParams = $this->getMethodParams($routeEntity);
 
-        $validatedParams = $this->validateParams($params, $reflectionParams);
-        unset($validatedParams[self::REQUEST_INDEX]);
+        try {
+            $this->checkParamSet($params, $methodParams);
+        } catch (MissingRouteArgumentException $e) {
+            throw new StatusErrorException($e->getMessage(), 404, $e);
+        }
 
-        $controllerInstance = new $controller();
-        $controllerInstance->$action(...$validatedParams);
+       try {
+            $finalParams = $this->castParams(
+                $params,
+                $methodParams
+            );
+        } catch (InvalidRouteArgumentException $e) {
+            throw new StatusErrorException($e->getMessage(), 404, $e);
+        }
+
+        $controllerInstance = new $routeEntity->controller();
+        $action = $routeEntity->action;
+
+        $controllerInstance->$action(...$finalParams);
     }
 
     /**
@@ -274,11 +359,10 @@ class RouteMapper
      * @throws StatusErrorException
      * @throws InvalidRouteArgumentException
      */
-    public function dispatch(string $path, string $method): void
+    public
+    function dispatch(string $path, string $method): void
     {
         $routeEntity = $this->getRouteEntity($path, $method);
-        $controller = $routeEntity->controller;
-        $action = $routeEntity->action;
         $params = $this->getParams($path, $routeEntity->urlPattern);
 
         if ($method === 'POST') {
@@ -286,8 +370,7 @@ class RouteMapper
         }
 
         $this->run(
-            $controller,
-            $action,
+            $routeEntity,
             $params,
         );
     }
