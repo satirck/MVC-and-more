@@ -12,7 +12,6 @@ use App\Repository\UserRepository;
 
 use App\Route\Exceptions\StatusErrorException;
 use Exception;
-use http\Env\Response;
 
 #[DomainKeyAttribute('/users')]
 class UserRouteController implements RouteControllerInterface

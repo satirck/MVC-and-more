@@ -58,8 +58,11 @@ class RouteMapper
                     continue;
                 }
 
-                if (is_dir($filePath) && $file != '.' && $file != '..'){
-                    $some = $this->getControllerFiles($filePath);
+                if (is_dir($filePath) && $file != '.' && $file != '..') {
+                    $returnFiles = array_merge(
+                        $returnFiles,
+                        $this->getControllerFiles($filePath)
+                    );
                 }
             }
         }
@@ -261,13 +264,13 @@ class RouteMapper
 
     /**
      * @param array $params -> params from request
-     * @param MethodParam[] $reqMethodParams
+     * @param MethodParam[] $methodParams
      *
      * @throws MissingRouteArgumentException
      */
-    private function checkParamSet(array $params, array $reqMethodParams): void
+    private function checkParamSet(array $params, array $methodParams): void
     {
-        foreach ($reqMethodParams as $methodParam) {
+        foreach ($methodParams as $methodParam) {
             $name = $methodParam->name;
             $isOptional = $methodParam->optional;
 
@@ -282,7 +285,6 @@ class RouteMapper
                 );
             }
         }
-
     }
 
     /**
@@ -301,23 +303,18 @@ class RouteMapper
             $typeName = $methodParams->typename;
             $value = $params[$name] ?? $params[self::REQUEST_INDEX][$name];
 
+            //TODO make prettier
+            if ($typeName !== 'int' && $typeName !== 'string' && !class_exists($typeName)) {
+                throw new InvalidRouteArgumentException();
+            }
+
             if (class_exists($typeName) && method_exists($typeName, 'fromJson')) {
                 $newParams[$name] = $typeName::fromJson($value);
+
                 continue;
             }
 
-            if ($typeName === 'int') {
-                if (is_int($value)) {
-                    continue;
-                }
-
-                if (is_numeric($value)) {
-                    $newParams[$name] = (int)$value;
-                    continue;
-                }
-            }
-
-            throw new InvalidRouteArgumentException();
+            $newParams[$name] = $typeName === 'int' ? (int)$value : $value;
         }
 
         return $newParams;
@@ -339,7 +336,7 @@ class RouteMapper
             throw new StatusErrorException($e->getMessage(), 404, $e);
         }
 
-       try {
+        try {
             $finalParams = $this->castParams(
                 $params,
                 $methodParams
@@ -359,8 +356,7 @@ class RouteMapper
      * @throws StatusErrorException
      * @throws InvalidRouteArgumentException
      */
-    public
-    function dispatch(string $path, string $method): void
+    public function dispatch(string $path, string $method): void
     {
         $routeEntity = $this->getRouteEntity($path, $method);
         $params = $this->getParams($path, $routeEntity->urlPattern);
