@@ -2,48 +2,30 @@
 
 declare(strict_types=1);
 
-require_once 'autoloader.php';
+require_once 'vendor/autoload.php';
 
-use App\Data\User;
+use App\Route\RouteMapper;
+use App\Route\Exceptions\{StatusErrorException, InvalidRouteArgumentException};
 
-function generate_array(): array
-{
-    $data = array();
+use Whoops\Run;
+use Whoops\Handler\PrettyPageHandler;
 
-    for ($i = 0; $i < 40; $i++) {
-        $age = random_int(1, 30);
+$whoops = new Run;
+$whoops->pushHandler(new PrettyPageHandler);
+$whoops->register();
 
-        $name = sprintf('%d ne %d xd', $age, $age);
-        $data[] = new User($name, $age);
-    }
+$url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$method = $_SERVER['REQUEST_METHOD'];
 
-    return $data;
+$routeMapper = new RouteMapper('app/Route/Controllers');
+
+try {
+    $routeMapper->dispatch($url, $method);
+} catch (StatusErrorException | InvalidRouteArgumentException $e) {
+    http_response_code($e->getCode());
+    echo sprintf('Error with code [%d]! %s<br>', $e->getCode(), $e->getMessage());
 }
-
-function is_elder(User $user): bool
-{
-    return !($user->getAge() < 18);
+catch (ReflectionException $e) {
+    http_response_code($e->getCode());
+    echo sprintf('Error with controllers reflections in url! %s<br>', $url);
 }
-
-function filter_array_by_age(array $arr): array
-{
-    return array_filter($arr, 'is_elder');
-}
-
-function print_array(array $arr): void
-{
-    foreach ($arr as $item) {
-        echo $item;
-    }
-}
-
-$data = generate_array();
-
-echo 'non filtered<br>';
-print_array($data);
-echo '<br><br>';
-
-$filtered = filter_array_by_age($data);
-
-echo 'filtered<br>';
-print_array($filtered);
